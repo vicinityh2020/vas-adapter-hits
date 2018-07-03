@@ -20,16 +20,16 @@ class ParkingLot(models.Model):
 
 class ParkingSpace(models.Model):
 
-    UNKNOWN = 1
-    VACANT = 2
-    OCCUPIED = 3
+    UNKNOWN = 'Unknown'
+    VACANT = 'Vacant'
+    OCCUPIED = 'Occupied'
     STATUS_CHOICES = (
         (UNKNOWN, 'Unknown'),
         (VACANT, 'Vacant'),
         (OCCUPIED, 'Occupied'),
     )
 
-    oid = models.UUIDField(default=uuid.uuid4, editable=False)
+    oid = models.UUIDField(default=None, editable=True)
     parking_lot = models.ForeignKey(ParkingLot, null=True, on_delete=models.CASCADE)
 
     mac_address = models.CharField(primary_key=True, default=None, max_length=255)

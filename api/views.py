@@ -50,3 +50,18 @@ class StatusView(APIView):
 
     def get(self, request):
         return Response(self.r, status=status.HTTP_200_OK)
+
+
+class ParkingReservationView(APIView):
+
+    r = {
+        "error": {},
+        "message": 'success',
+        "status": "OK",
+    }
+
+    @csrf_exempt
+    def post(self, request, parking_space_id, res_date, from_time, to_time):
+        all_reservations = ParkingReservation.objects.all()
+        print('hi')
+        return Response(self.r, status=status.HTTP_200_OK)
