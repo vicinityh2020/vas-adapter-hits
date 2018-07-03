@@ -1,5 +1,4 @@
-import uuid
-
+from .converters import ReservationConverter
 from django.db import models
 
 
@@ -63,11 +62,13 @@ class ParkingReservation(models.Model):
     id = models.BigAutoField(primary_key=True)
     parking_space = models.ForeignKey(ParkingSpace, null=True, on_delete=models.CASCADE)
 
-    reservation_unique = models.CharField(max_length=16, default=None)
+    reservation_unique = models.CharField(max_length=16, default=ReservationConverter.generate_unique_res)
     username = models.CharField(max_length=255, default=None)
 
+    date = models.DateField(default=None)
+
     time_start = models.TimeField(default=None)
-    time_expires = models.TimeField(default=None)
+    time_expire = models.TimeField(default=None)
 
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
