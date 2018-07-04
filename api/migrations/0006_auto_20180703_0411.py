@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='parkingreservation',
             name='reservation_unique',
-            field=models.CharField(default=api.converters.ReservationConverter.generate_unique_res, max_length=16),
+            field=models.CharField(default=api.converters.conv.generate_unique_res, max_length=16),
         ),
     ]

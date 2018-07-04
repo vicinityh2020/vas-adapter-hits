@@ -2,7 +2,7 @@ from datetime import datetime
 import random, string
 
 
-class ReservationConverter:
+class conv:
 
     @staticmethod
     def seconds_to_time(seconds):
@@ -14,6 +14,10 @@ class ReservationConverter:
         r = datetime.strptime(hm_time, '%H:%M').time()
 
         return r
+
+    @staticmethod
+    def time_to_seconds(time):
+        return (time.hour * 3600) + (time.minute * 60) + (time.second * 1)
 
     @staticmethod
     def generate_unique_res():

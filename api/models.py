@@ -1,4 +1,4 @@
-from .converters import ReservationConverter
+from .converters import conv
 from django.db import models
 
 
@@ -62,7 +62,7 @@ class ParkingReservation(models.Model):
     id = models.BigAutoField(primary_key=True)
     parking_space = models.ForeignKey(ParkingSpace, null=True, on_delete=models.CASCADE)
 
-    reservation_unique = models.CharField(max_length=16, default=ReservationConverter.generate_unique_res)
+    reservation_unique = models.CharField(max_length=16, default=conv.generate_unique_res)
     username = models.CharField(max_length=255, default=None)
 
     date = models.DateField(default=None)
