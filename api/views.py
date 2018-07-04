@@ -1,6 +1,7 @@
-from datetime import datetime
+from datetime import datetime, time, timedelta
 
 import rest_framework.status as status
+from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -26,11 +27,9 @@ class ParkingSpaceView(APIView):
             res_queryset = ParkingReservation.objects.filter(parking_space=parking_slot)
 
         except ParkingReservation.DoesNotExist:
-            # return full day (e.g. 12.00 - 18.00)
-
             response['body'].append({
-                'start_time': conv.time_to_seconds(parking_slot.available_from) + 60,
-                'end_time': conv.time_to_seconds(parking_slot.available_from) - 60,
+                'start_time': conv.seconds_to_time(request.data['from']),
+                'end_time': conv.seconds_to_time(request.data['to']),
             })
 
             return Response(response, status=status.HTTP_200_OK)
@@ -41,10 +40,30 @@ class ParkingSpaceView(APIView):
             response['status'] = status.HTTP_404_NOT_FOUND
             return Response(response, status=status.HTTP_404_NOT_FOUND)
 
-        sorted_start = res_queryset.order_by('time_start')
+        sorted_queryset = res_queryset.order_by('time_start')
 
-        start = conv.time_to_seconds(parking_slot.available_from)
-        end = conv.time_to_seconds(sorted_start[0].time_start)
+        min_from = conv.seconds_to_time(request.data['from'])
+        max_to = conv.seconds_to_time(request.data['to'])
+
+        for entry in sorted_queryset:
+            if entry.time_start <= min_from <= entry.time_expire:
+                min_from = entry.time_expire
+            if entry.time_start <= max_to <= entry.time_expire:
+                max_to = entry.time_start
+
+        max_to_seconds = conv.time_to_seconds(max_to)
+        min_from_seconds = conv.time_to_seconds(min_from)
+
+        if (max_to_seconds - min_from_seconds) < 0:
+            return Response(response, status.HTTP_200_OK)
+
+        sorted_queryset = sorted_queryset.filter(time_start__gt=min_from, time_expire__lt=max_to)
+
+        if len(sorted_queryset) == 0:
+            return Response(response, status=status.HTTP_200_OK)
+
+        start = min_from_seconds + 60
+        end = conv.time_to_seconds(sorted_queryset.first().time_start)
 
         # at least 2 minutes in between reservations
         if (end - start) > 120:
@@ -57,11 +76,11 @@ class ParkingSpaceView(APIView):
                 'end_time': conv.seconds_to_time(end - 60),
             })
 
-        res_count = len(sorted_start)
+        res_count = len(sorted_queryset)
         for i in range(res_count):
-            start = conv.time_to_seconds(sorted_start[i].time_expire)
+            start = conv.time_to_seconds(sorted_queryset[i].time_expire)
 
-            end = parking_slot.available_to if (i == res_count - 1) else sorted_start[i + 1].time_start
+            end = max_to if (i == res_count - 1) else sorted_queryset[i + 1].time_start
             end = conv.time_to_seconds(end)
 
             if (end - start) > 120:
