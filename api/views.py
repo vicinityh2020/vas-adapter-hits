@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 
+import requests
 import rest_framework.status as status
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -10,6 +11,28 @@ from rest_framework.views import APIView
 from .converters import conv
 from .models import ParkingSpace, ParkingReservation
 
+@csrf_exempt
+def cancel_reservation(request, res_id):
+    response = {
+        'error': False,
+        'message': 'success',
+        'status': status.HTTP_200_OK,
+        'body': [],
+    }
+
+    try:
+        reservation = ParkingReservation.objects.get(reservation_unique=res_id)
+
+    except ParkingReservation.DoesNotExist:
+        response['error'] = True
+        response['message'] = 'No reservation with id {}'.format(res_id)
+        response['status'] = status.HTTP_404_NOT_FOUND
+        return response
+
+    reservation.delete()
+    requests.post(url='http://localhost:8080/rest/items/LightColor', data='63,92,46')
+
+    return JsonResponse(data=response, status=status.HTTP_200_OK)
 
 @csrf_exempt
 def view_parking_space(request, parking_slot_id):
@@ -197,5 +220,7 @@ def reserve_parking(request, parking_slot_id):
         'time_expure': to_time,
         'date': serialized_reservation.date,
     }
+
+    resp = requests.post(url='http://localhost:8080/rest/items/LightColor', data='0,100,46')
 
     return JsonResponse(data=r, status=status.HTTP_200_OK)

@@ -25,7 +25,7 @@ SECRET_KEY = '8=saxoi!c!3y+g^l^^m%lq47fy^yni87tdxluos@5g83rnuzq&'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.1.244']
 
 
 # Application definition
@@ -81,7 +81,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'VASHITS',
-        'USER': 'vicinity',
+        'USER': 'postgres',
         'PASSWORD': '123456',
         'HOST': 'localhost',
         'PORT': '5432',
