@@ -229,5 +229,6 @@ def reserve_parking(request, parking_slot_id):
 
 
 @csrf_exempt
-def sensor_event(request, subscriber_id, event_id):
+def sensor_event(request, subscriber_id, eid):
     print("Test event.")
+    return JsonResponse({}, status=200)
