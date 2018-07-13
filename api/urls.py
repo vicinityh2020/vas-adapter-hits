@@ -10,5 +10,6 @@ urlpatterns = [
     path('reserve/parking-slots/<int:parking_slot_id>',
          views.reserve_parking, name='parking_reservation_view'),
     path('cancel/parking-res/<res_id>',
-         views.cancel_reservation, name='parking_reservation_cancel')
+         views.cancel_reservation, name='parking_reservation_cancel'),
+    path('objects/<subscriber_id>/events/<eid>', views.sensor_event, name="sensor_event_handler")
 ]

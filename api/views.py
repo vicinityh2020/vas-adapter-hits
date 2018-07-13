@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 from .converters import conv
 from .models import ParkingSpace, ParkingReservation
 
+
 @csrf_exempt
 def cancel_reservation(request, res_id):
     response = {
@@ -33,6 +34,7 @@ def cancel_reservation(request, res_id):
     requests.post(url='http://localhost:8080/rest/items/LightColor', data='63,92,46')
 
     return JsonResponse(data=response, status=status.HTTP_200_OK)
+
 
 @csrf_exempt
 def view_parking_space(request, parking_slot_id):
@@ -224,3 +226,8 @@ def reserve_parking(request, parking_slot_id):
     resp = requests.post(url='http://localhost:8080/rest/items/LightColor', data='0,100,46')
 
     return JsonResponse(data=r, status=status.HTTP_200_OK)
+
+
+@csrf_exempt
+def sensor_event(request, subscriber_id, event_id):
+    print("Test event.")
