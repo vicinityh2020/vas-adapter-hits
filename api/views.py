@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 import requests
 import rest_framework.status as status
@@ -31,7 +31,6 @@ def cancel_reservation(request, res_id):
         return response
 
     reservation.delete()
-    requests.post(url='http://localhost:8080/rest/items/LightColor', data='63,92,46')
 
     return JsonResponse(data=response, status=status.HTTP_200_OK)
 
@@ -223,12 +222,40 @@ def reserve_parking(request, parking_slot_id):
         'date': serialized_reservation.date,
     }
 
-    resp = requests.post(url='http://localhost:8080/rest/items/LightColor', data='0,100,46')
-
     return JsonResponse(data=r, status=status.HTTP_200_OK)
 
 
 @csrf_exempt
 def sensor_event(request, subscriber_id, eid):
-    print("Test event.")
-    return JsonResponse({}, status=200)
+    try:
+        request.data = json.loads(request.body)
+        parking_space = ParkingSpace.objects.get(mac_address=request.data['sensor_id'])
+    except ParkingSpace.DoesNotExist as e:
+        print(e)
+        return JsonResponse(data={}, status=status.HTTP_404_NOT_FOUND)
+    except json.JSONDecodeError as e:
+        print(e)
+        return JsonResponse(data={}, status=status.HTTP_400_BAD_REQUEST)
+
+    s = request.data['value']
+    parking_space.sensor_status = s
+    parking_space.save()
+
+    lamp_id = 'eefb800a-24c6-4206-b112-ff6caffa9cc8' # TODO: replace with database entry
+
+    url = 'http://127.0.0.1:9998/agent/remote/objects/{}/properties/color'.format(lamp_id)
+    h = {
+        'infrastructure-id': 'ae66d461-7545-42b6-8951-5ea593156bd8',
+        'adapter-id': 'vas-hits-uc1',
+        'Content-Type': 'application/json',
+    }
+
+    if  s == 'Occupied':
+        requests.put(url=url, json={'color': 'red', 'blink': False}, headers=h)
+    elif s == 'Vacant':
+        a = requests.put(url=url, json={'color': 'green', 'blink': False}, headers=h)
+        print(a)
+    else:
+        requests.put(url=url, json={'color': 'yellow', 'blink': False}, headers=h)
+
+    return JsonResponse(data={}, status=status.HTTP_200_OK)
